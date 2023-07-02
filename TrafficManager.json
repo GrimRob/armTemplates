@@ -1,0 +1,108 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "TrafficManagerName": {
+      "type": "string",     
+      "metadata": { "description": "Traffic manager name; required" }
+    },
+    "uniqueDnsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Relative DNS name for the Traffic Manager profile, resulting FQDN will be <uniqueDnsName>.trafficmanager.net, must be globally unique."
+      }
+    },
+    "WebAppEndpoints": {
+      "type": "array",
+      "metadata": { "description": "Array list of the names of the web apps to include in the traffic manager, these must be the full name." }
+    },
+    "EndpointNameMethod": {
+      "type": "string",
+      "defaultValue": "descriptor",
+      "allowedValues": [ "descriptor", "resourcegroup" ]
+    },
+    "HealthCheckPath": {
+      "type": "string",
+      "defaultValue": "/",
+      "metadata": { "description": "The relative path for the traffic manager health check; the path needs to begin with the forward slash." }
+    },
+    "RoutingMethod": {
+      "type": "string",
+      "defaultValue": "Performance",
+      "allowedValues": [ "Performance", "Weighted", "Priority", "Geographic" ],
+      "metadata": { "description": "The routing method for directing traffict to the underlying sites" }
+    },
+    "WebAppWeights": {
+      "type": "array",
+      "metadata": { "description": "Array list of the weights to assign to each endpoint added to the traffic manager. It is a proportion between the various endpoints and does not have to add up to 100." },
+      "defaultValue": []
+    },
+    "MonitoringProtocol": {
+      "type": "string",
+      "defaultValue": "HTTPS",
+      "allowedValues": [ "HTTPS", "TCP" ],
+      "metadata": { "description": " The monitoring protocol directing traffic in secure way" }
+    },
+    "MonitoringPort": {
+      "type": "int",
+      "defaultValue": 443,
+      "allowedValues": [ 443, 801, 1433 ],
+      "metadata": { "description": " The monitoring protocol port directing traffic in secure way" }
+    }
+  },
+  "variables": {
+    "IsWeighted": "[and(equals(tolower(parameters('RoutingMethod')), 'weighted'), equals(length(parameters('WebAppWeights')), length(parameters('WebAppEndpoints'))))]",
+    "copy": [
+      {
+        "name": "EndPoints",
+        "count": "[length(parameters('WebAppEndpoints'))]",
+        "input": {
+          "appName": "[tolower(first(split(replace(split(parameters('WebAppEndpoints')[copyIndex('EndPoints')], '>')[0], '!', ''), '-')))]",
+          "appResourceGroup": "[last(split(replace(split(parameters('WebAppEndpoints')[copyIndex('EndPoints')], '>')[0], '!', ''), '-'))]",
+          "appDescriptorId": "[concat(replace(split(parameters('WebAppEndpoints')[copyIndex('EndPoints')], '-')[0],'!',''), '-', copyIndex('EndPoints'))]",
+          "isDisabled": "[equals(substring(concat(parameters('WebAppEndpoints')[copyIndex('EndPoints')], ' '), 0, 1), '!')]",
+          "weight": "[if(variables('IsWeighted'),parameters('WebAppWeights')[copyIndex('EndPoints')],json('null'))]",
+          "name": "[if(contains(parameters('WebAppEndpoints')[copyIndex('EndPoints')], '>'), last(split(parameters('WebAppEndpoints')[copyIndex('EndPoints')], '>')), '')]"
+        }
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/trafficManagerProfiles",
+      "apiVersion": "2018-08-01",
+      "name": "[parameters('TrafficManagerName')]",
+      "location": "global",
+      "properties": {
+        "profileStatus": "Enabled",
+        "trafficRoutingMethod": "[parameters('RoutingMethod')]",
+        "dnsConfig": {
+          "relativeName": "[parameters('uniqueDnsName')]",
+          "ttl": 30
+        },
+        "monitorConfig": {
+          "protocol": "[parameters('MonitoringProtocol')]",
+          "port": "[parameters('MonitoringPort')]",
+          "path": "[if(equals(parameters('MonitoringProtocol'), 'TCP'), '' ,parameters('HealthCheckPath'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+      "apiVersion": "2017-05-01",
+      "copy": {
+        "count": "[length(variables('EndPoints'))]",
+        "name": "epAzureCopy"
+      },
+      "dependsOn": [ "[concat('Microsoft.Network/trafficManagerProfiles/', parameters('TrafficManagerName'))]" ],
+      "name": "[concat(parameters('TrafficManagerName'), '/', if(empty(variables('EndPoints')[copyIndex()].name), concat(variables('EndPoints')[copyIndex()][if(equals(parameters('EndpointNameMethod'), 'resourcegroup'), 'appResourceGroup', 'appDescriptorId')], '-AzEndpoint'), variables('EndPoints')[copyIndex()].name))]",
+      "location": "global",
+      "tags": {},
+      "properties": {
+        "endpointStatus": "[if(variables('EndPoints')[copyIndex()].isDisabled,'Disabled','Enabled')]",
+        "targetResourceId": "[resourceId(variables('EndPoints')[copyIndex()].appResourceGroup, 'Microsoft.Web/sites', variables('EndPoints')[copyIndex()].appName)]",
+        "weight": "[variables('EndPoints')[copyIndex()].weight]"
+      }
+    }
+  ]
+}

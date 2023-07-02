@@ -1,0 +1,145 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Base name of the resource such as web app name and app service plan"
+      },
+      "minLength": 2
+    },
+    "servicePlanName": {
+      "type": "string",
+      "defaultValue": "myServicePlan",
+      "metadata": {
+        "description": "The App Service Plan which must exist"
+      }
+    },
+    "servicePlanResourceGroup": {
+      "type": "string",
+      "defaultValue": "myRG",
+      "metadata": {
+        "description": "The App Service Plan RG"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    },
+    "clientAffinity": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "For stateful sites, stickiness for a client connection to a worker instance"
+      }
+    },
+    "alwaysOn": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        true,
+        false
+      ],
+      "metadata": {
+        "description": "For if the site is permenately kept running or automatically shuts down when not in use. This should only be On for web jobs."
+      }
+    },
+    "autoHealEnabled": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        true,
+        false
+      ],
+      "metadata": {
+        "description": "Turn on to enable auto healing."
+      }
+    },
+    "use32BitWorkerProcess": {
+      "type": "bool",
+      "defaultValue": true,
+      "allowedValues": [
+        true,
+        false
+      ]
+    },
+    "httpsOnly": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        true,
+        false
+      ]
+    },
+    "linuxFxVersion": {
+      "type": "string",
+      "defaultValue": "PHP|8.2",
+      "metadata": {
+        "description": "Linux FX version to use for the web app. Defaults to PHP|8.2."
+      }
+    },
+    "defaultDocument": {
+      "type": "string",
+      "defaultValue": "home.php"
+    },
+    "http20Enabled": {
+      "type": "bool",
+      "defaultValue": true,
+      "allowedValues": [
+        true,
+        false
+      ]
+    },
+    "numberOfWorkers": {
+      "type": "int",
+      "defaultValue": 1
+    },
+    "minTlsVersion": {
+      "type": "string",
+      "defaultValue": "1.0",
+      "metadata": {
+        "description": "Minimum TLS Version for sites that connect to your WebApp to support."
+      },
+      "allowedValues": [
+        "1.0",
+        "1.1",
+        "1.2"
+      ]
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2018-11-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "[parameters('webAppName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "name": "[parameters('webAppName')]",
+        "serverFarmId": "[resourceId(parameters('servicePlanResourceGroup'), 'Microsoft.Web/serverfarms', parameters('servicePlanName'))]",
+        "clientAffinityEnabled": "[parameters('clientAffinity')]",
+        "siteConfig": {
+          "alwaysOn": "[parameters('alwaysOn')]",
+          "linuxFxVersion": "[parameters('linuxFxVersion')]",
+          "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
+          "minTlsVersion": "[parameters('minTlsVersion')]",
+          "defaultDocuments": [
+            "[parameters('defaultDocument')]"
+          ],
+          "http20Enabled": "[parameters('http20Enabled')]",
+          "numberOfWorkers": "[parameters('numberOfWorkers')]",
+          "autoHealEnabled": "[parameters('autoHealEnabled')]",
+          "healthCheckPath": "/tmhealth"
+        },
+        "httpsOnly": "[parameters('httpsOnly')]"
+      }
+    }
+  ]
+}
