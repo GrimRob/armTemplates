@@ -136,7 +136,8 @@
           "http20Enabled": "[parameters('http20Enabled')]",
           "numberOfWorkers": "[parameters('numberOfWorkers')]",
           "autoHealEnabled": "[parameters('autoHealEnabled')]",
-          "healthCheckPath": "/tmhealth"
+          "healthCheckPath": "/health",
+          "ftpsState": "FtpsOnly"
         },
         "httpsOnly": "[parameters('httpsOnly')]"
       }
