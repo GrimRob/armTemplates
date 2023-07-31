@@ -1,7 +1,7 @@
-# armTemplates
+# ARM Templates Library
 
-The is a small ARM templates collection I have assembled.
+This is a small ARM template collection I have assembled for use with mainly Azure web apps and functions.
 
 Microsoft have their official documentation at [azure.com](https://azure.microsoft.com/documentation/templates).
 
-I find it easiser to use this simple set.
+I find it easier to use this simple set.
