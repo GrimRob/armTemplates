@@ -4,6 +4,7 @@
   "parameters": {
     "servicePlanName": {
       "type": "string",
+      "defaultValue": "FishyDev",
       "metadata": {
         "description": "The App Service Plan name"
       },
@@ -20,7 +21,7 @@
       "type": "string",
       "defaultValue": "Standard",
       "metadata": {
-        "description": "SKU tier of the app service plan. Defaults to Free."
+        "description": "SKU tier of the app service plan. Defaults to Standard."
       }
     },
     "location": {
@@ -35,6 +36,13 @@
       "defaultValue": false,
       "metadata": {
         "description": "perSiteScaling setting - true or false"
+      }
+    },
+    "reserved": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "true for Linux, false for Windows"
       }
     },
     "kind": {
@@ -59,7 +67,7 @@
       "properties": {
         "name": "[parameters('servicePlanName')]",
         "perSiteScaling": "[parameters('perSiteScaling')]",
-        "reserved": true
+        "reserved": "[parameters('reserved')]"
       },
       "dependsOn": [],
       "sku": {

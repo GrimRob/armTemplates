@@ -37,7 +37,7 @@
     },
     "servicePlanResourceGroup": {
       "type": "string",
-      "defaultValue": "[resourceGroup().location]",
+      "defaultValue": "[resourceGroup().name]",
       "metadata": {
         "description": "The App Service Plan RG"
       }
@@ -80,9 +80,9 @@
         false
       ]
     },
-    "httpsOnly": {
+    "http20Enabled": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "allowedValues": [
         true,
         false
