@@ -44,24 +44,13 @@
       "metadata": {
         "description": "true for Linux, false for Windows"
       }
-    },
-    "kind": {
-      "type": "string",
-      "defaultValue": "app",
-      "allowedValues": [
-        "app",
-        "linux"
-      ],
-      "metadata": {
-        "description": "Kind of serviceplan"
-      }
     }
   },
   "resources": [
     {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2020-06-01",
-      "kind": "[parameters('kind')]",
+      "kind": "[if(parameters('reserved'), 'linux', 'app')]",
       "name": "[parameters('servicePlanName')]",
       "location": "[parameters('location')]",
       "properties": {
