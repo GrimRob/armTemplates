@@ -45,7 +45,7 @@
         false
       ],
       "metadata": {
-        "description": "For if the site is permenately kept running or automatically shuts down when not in use. This should only be On for web jobs."
+        "description": "For if the site is permanently kept running or automatically shuts down when not in use. This should only be On for web jobs."
       }
     },
     "autoHealEnabled": {
