@@ -99,7 +99,25 @@
         "1.1",
         "1.2"
       ]
-    }
+    },    
+    "httpsOnly": {
+      "type": "bool",
+      "defaultValue": false,
+      "allowedValues": [
+        true,
+        false
+      ]
+    },
+    "netFrameworkVersion": {
+      "type": "string",
+      "defaultValue": "v8.0",
+      "allowedValues": [
+        "v4.0",
+        "v5.0",
+        "v6.0",
+        "v8.0"
+      ]
+    }   
   },
   "variables": {
     "functionAppName": "[parameters('appName')]",
@@ -134,6 +152,7 @@
           "use32BitWorkerProcess": "[parameters('use32BitWorkerProcess')]",
           "http20Enabled": "[parameters('http20Enabled')]",
           "minTlsVersion": "[parameters('minTlsVersion')]",
+          "netFrameworkVersion": "[parameters('netFrameworkVersion')]",
           "appSettings": [
             {
               "name": "AzureWebJobsStorage",
@@ -164,7 +183,8 @@
               "value": "[variables('functionWorkerRuntime')]"
             }
           ]
-        }
+        },
+        "httpsOnly": "[parameters('httpsOnly')]"
       }
     },
     {
