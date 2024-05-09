@@ -109,6 +109,13 @@
         "1.1",
         "1.2"
       ]
+    },
+    "healthCheckPath": {
+      "type": "string",
+      "defaultValue": "/tmhealth",
+      "metadata": {
+        "description": "Url of health check which should return 200 when healthy."
+      }
     }
   },
   "resources": [
@@ -136,7 +143,7 @@
           "http20Enabled": "[parameters('http20Enabled')]",
           "numberOfWorkers": "[parameters('numberOfWorkers')]",
           "autoHealEnabled": "[parameters('autoHealEnabled')]",
-          "healthCheckPath": "/health",
+          "healthCheckPath": "[parameters('healthCheckPath')]",
           "ftpsState": "FtpsOnly"
         },
         "httpsOnly": "[parameters('httpsOnly')]"
