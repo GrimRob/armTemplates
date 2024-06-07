@@ -21,7 +21,7 @@
       "type": "string",
       "defaultValue": "Standard",
       "metadata": {
-        "description": "SKU tier of the app service plan. Defaults to Standard."
+        "description": "SKU tier of the app service plan. Defaults to `Standard`. Use `Dynamic` for Consumption."
       }
     },
     "location": {
